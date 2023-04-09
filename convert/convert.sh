@@ -7,6 +7,10 @@ mkdir -p unicode/color
 mkdir -p unicode/flat
 mkdir -p unicode/hc
 
+first_of() {
+  ls -1 "$1"/*.svg | head -n1
+}
+
 find fluentui-emoji/assets -name metadata.json | while read meta; do
   data=$(jq -r '. | .out = "codes=(" + .unicode + ") cldr=\"" + .cldr + "\"" | .out' "${meta}")
   eval ${data}
@@ -21,9 +25,9 @@ find fluentui-emoji/assets -name metadata.json | while read meta; do
   # 3D
   cp "${src_dir}/3D"/*.png unicode/3d/${code}.png
   # Color
-  convert/svg2png <"${src_dir}/Color"/*.svg >unicode/color/${code}.png
+  convert/svg2png <"$(first_of "${src_dir}/Color")" >unicode/color/${code}.png
   # Flat
-  convert/svg2png <"${src_dir}/Flat"/*.svg >unicode/flat/${code}.png
+  convert/svg2png <"$(first_of "${src_dir}/Flat")" >unicode/flat/${code}.png
   # High Contrast
-  convert/svg2png <"${src_dir}/High Contrast"/*.svg >unicode/hc/${code}.png
+  convert/svg2png <"$(first_of "${src_dir}/High Contrast")" >unicode/hc/${code}.png
 done
