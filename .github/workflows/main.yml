@@ -1,0 +1,12 @@
+name: generate new
+
+on:
+  workflow_dispatch:
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+
+    steps:
+    - run: |
+        ./unicode/convert.sh
