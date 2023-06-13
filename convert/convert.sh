@@ -11,10 +11,17 @@ first_of() {
   ls -1 "$1"/*.svg | head -n1
 }
 
+get_png() {
+  filena=$(ls -1 "$1"/*.svg | head -n1)
+  fuck=${filena%.*}.png
+}
+
+fuck=nothing
+
 find fluentui-emoji/assets -name metadata.json | while read meta; do
-  data=$(jq -r '. | .out = "codes=(" + .unicode + ") cldr=\"" + .cldr + "\"" | .out' "${meta}")
+  data=$(jq -r '. | .out = "codes=(" + .unicode + ") cldr=\"" + .cldr + "\"" | .out' "$meta")
   eval ${data}
-  code=${codes[0]}
+  code=${codes[@]}
   echo ${code} ${cldr}
 
   src_dir=${meta%/metadata.json}
@@ -23,11 +30,17 @@ find fluentui-emoji/assets -name metadata.json | while read meta; do
   fi
 
   # 3D
-  cp "${src_dir}/3D"/*.png unicode/3d/${code}.png
+  cp "${src_dir}/3D"/*.png "unicode/3d/$(sed 's/ /-/g' <<< "${code}").png"
   # Color
-  convert/svg2png <"$(first_of "${src_dir}/Color")" >unicode/color/${code}.png
+  get_png "${src_dir}/Color"
+  inkscape "$(first_of "${src_dir}/Color")" --export-filename="$fuck" -w 256 -h 256 2>/dev/null |:
+  mv "$fuck" "unicode/color/$(sed 's/ /-/g' <<< "${code}").png"
   # Flat
-  convert/svg2png <"$(first_of "${src_dir}/Flat")" >unicode/flat/${code}.png
+  get_png "${src_dir}/Flat"
+  inkscape "$(first_of "${src_dir}/Flat")" --export-filename="$fuck" -w 256 -h 256 2>/dev/null |:
+  mv "$fuck" "unicode/flat/$(sed 's/ /-/g' <<< "${code}").png"
   # High Contrast
-  convert/svg2png <"$(first_of "${src_dir}/High Contrast")" >unicode/hc/${code}.png
+  get_png "${src_dir}/High Contrast"
+  inkscape "$(first_of "${src_dir}/High Contrast")" --export-filename="$fuck" -w 256 -h 256 2>/dev/null |:
+  mv "$fuck" "unicode/hc/$(sed 's/ /-/g' <<< "${code}").png"
 done
